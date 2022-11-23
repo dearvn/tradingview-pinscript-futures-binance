@@ -21,7 +21,12 @@ You can use this strategy candle bar as study case.
 
 ## BACKTEST
 
-** Over 70% accurrate
+** Over 90% accurately then use `futures-strategy-1m-candles-best.txt`
+
+![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/accurrate-90.png?raw=true "accurrate-90")
+
+
+** Over 70% accurately and filter sideway then use `binance-futures-strategy-candle-bar.txt`
 
 ![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/backtest.png?raw=true "backtest")
 
