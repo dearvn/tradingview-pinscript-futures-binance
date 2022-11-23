@@ -2,7 +2,7 @@
 // © binancash
 
 //@version=5
-strategy("Binancaseh - Candle Strategy Futures on Binance", overlay=true, default_qty_value=200, initial_capital=1)
+strategy("Binancash - Candle Strategy Futures on Binance", overlay=true, default_qty_value=200, initial_capital=1)
 
 
 // config profit stoploss start
@@ -42,15 +42,15 @@ plot(running_pl, title = 'S',  style = plot.style_circles, linewidth = 1,color=c
 
 var bool is_strong_buy = false
 var bool is_strong_sell = false
-if running_ph and ta.crossover(close, running_ph)
+if running_ph and ta.crossover(close, running_ph) and barstate.isconfirmed
     is_strong_buy := true
     is_strong_sell := false
-if running_pl and ta.crossunder(close, running_ph)
+if running_pl and ta.crossunder(close, running_ph) and barstate.isconfirmed
     is_strong_buy := false
-if running_pl and ta.crossunder(close, running_pl)
+if running_pl and ta.crossunder(close, running_pl) and barstate.isconfirmed
     is_strong_sell := true
     is_strong_buy := false
-if running_pl and ta.crossover(close, running_pl)
+if running_pl and ta.crossover(close, running_pl) and barstate.isconfirmed
     is_strong_sell := false
 //vwap end
 
@@ -90,12 +90,12 @@ if ta.crossunder(ema3, Cto)
     is_cross_up := false
 
 //condition Long & Short
-long = (close > Cto and close[1] < Cto[1] and close > close[1] or close[1] > Cto[1] and close > close[1] and close [1] < close[2] and close > ema3) ? true : false
-profit_long = close < close[1] and low < ema3 and close[1] > ema3[1] and close[2] > ema3[2]
+long = (close > Cto and close[1] < Cto[1] and close > close[1] or close[1] > Cto[1] and close > close[1] and close [1] < close[2] and close > ema3)  and barstate.isconfirmed? true : false
+profit_long = close < close[1] and low < ema3 and close[1] > ema3[1] and close[2] > ema3[2] and barstate.isconfirmed
     
 
-short = (close < Cto and close[1] > Cto[1] and close < close[1] or close[1] < Cto[1] and close < close[1] and close [1] > close[2] and close < ema3) ? true : false
-profit_short = close > close[1] and high > ema3 and close[1] < ema3[1] and close[2] < ema3[2]
+short = (close < Cto and close[1] > Cto[1] and close < close[1] or close[1] < Cto[1] and close < close[1] and close [1] > close[2] and close < ema3)  and barstate.isconfirmed? true : false
+profit_short = close > close[1] and high > ema3 and close[1] < ema3[1] and close[2] < ema3[2] and barstate.isconfirmed
 
 var int trend = 0
 if long
@@ -125,10 +125,10 @@ wma_10_48 = request.security(symbol=syminfo.tickerid, timeframe="12", expression
 
 var bool cross_up_wma_10 = false
 var bool cross_down_wma_10 = false
-if ta.crossover(wma_10_11, wma_10_48)
+if ta.crossover(wma_10_11, wma_10_48) and barstate.isconfirmed
     cross_up_wma_10 := true
     cross_down_wma_10 := false
-if ta.crossunder(wma_10_11, wma_10_48)
+if ta.crossunder(wma_10_11, wma_10_48) and barstate.isconfirmed
     cross_up_wma_10 := false
     cross_down_wma_10 := true
 
@@ -179,10 +179,10 @@ vf_absolute = vf_dif > 0 ? vf_dif : vf_dif * (-1)
 // Volume Spikes //
 var bool gsig = false
 var bool rsig = false
-if ta.crossover(bull, bullma*x)
+if ta.crossover(bull, bullma*x) and barstate.isconfirmed
     gsig := true
     rsig := false
-if ta.crossover(bear, bearma*x)
+if ta.crossover(bear, bearma*x) and barstate.isconfirmed
     rsig := true
     gsig := false
 
@@ -316,8 +316,8 @@ oc = math.abs(open[1]-close[1])
 hl = math.abs(high[1]-low[1])
 ochl = (oc-hl)/hl
 ll = (low[1]-low[2])/low[2]
-crossUpWMA11 = ta.crossover(ema11, ema48)
-crossDownWMA11 = ta.crossunder(ema11, ema48)
+crossUpWMA11 = ta.crossover(ema11, ema48) and barstate.isconfirmed
+crossDownWMA11 = ta.crossunder(ema11, ema48) and barstate.isconfirmed
 var bool crossup11_48 = false
 var bool crossdown11_48 = false
 var int cnt_out_up = 0
@@ -349,12 +349,12 @@ wma48 = ta.wma(close, 48)
 plot(wma48, title="WMA48", color=color.yellow)
 
 // sideway start
-avg = (close + close[9] + close[8] + close[7] + close[6] +close[5] + close[4] + close[3] + close[2] + close[1])/10
+avg = (close[10] + close[9] + close[8] + close[7] + close[6] +close[5] + close[4] + close[3] + close[2] + close[1])/10
 sideway_short = wma13 < wma48 and wma13 < avg and avg < wma48
 
 sideway_long = wma13 > wma48 and wma13 > avg and avg > wma48
 
-sideway = math.abs(close-avg)/avg < 0.001
+sideway = math.abs(close[1]-avg)/avg < 0.001
 
 plotshape(sideway_short or sideway_long or sideway ? low1d*0.995 : na, title="Short", style=shape.diamond, location=location.absolute, color=sideway? color.white : (sideway_long? color.yellow: color.blue), size=size.tiny, textcolor = color.white)
 //plotshape(sideway_long ? *0.99 : na, title="Long", style=shape.xcross, location=location.absolute, color=color.yellow, size=size.small, textcolor = color.white)
@@ -364,17 +364,17 @@ plotshape(sideway_short or sideway_long or sideway ? low1d*0.995 : na, title="Sh
 wma200 = ta.wma(close, 200)
 plot(wma200, title="WMA200", color=color.white)
 
-crossUpWMA13 = ta.crossover(close, wma13)
-crossDownWMA13 = ta.crossunder(close, wma13)
-crossUpWMA48 = ta.crossover(close, wma48)
-crossDownWMA48 = ta.crossunder(close, wma48)
-crossUpWMA200 = ta.crossover(close, wma200)
-crossDownWMA200 = ta.crossunder(close, wma200)
+crossUpWMA13 = ta.crossover(close, wma13) and barstate.isconfirmed
+crossDownWMA13 = ta.crossunder(close, wma13) and barstate.isconfirmed
+crossUpWMA48 = ta.crossover(close, wma48) and barstate.isconfirmed
+crossDownWMA48 = ta.crossunder(close, wma48) and barstate.isconfirmed
+crossUpWMA200 = ta.crossover(close, wma200) and barstate.isconfirmed
+crossDownWMA200 = ta.crossunder(close, wma200) and barstate.isconfirmed
 
-crossUpWMA13_48 = ta.crossover(wma13, wma48)
-crossDownWMA13_48 = ta.crossunder(wma13, wma48)
-crossUpWMA48_200 = ta.crossover(wma48, wma200)
-crossDownWMA48_200 = ta.crossunder(wma48, wma200)
+crossUpWMA13_48 = ta.crossover(wma13, wma48) and barstate.isconfirmed
+crossDownWMA13_48 = ta.crossunder(wma13, wma48) and barstate.isconfirmed
+crossUpWMA48_200 = ta.crossover(wma48, wma200) and barstate.isconfirmed
+crossDownWMA48_200 = ta.crossunder(wma48, wma200) and barstate.isconfirmed
 
 var price_wmacrossup_arr = array.new_float()
 var price_wmacrossdown_arr = array.new_float()
@@ -436,13 +436,13 @@ if sideway
     is_trong_call := false
 strong_call = is_trong_call[2] and is_trong_call[1] and is_trong_call
 
-longCondition =  up10m_2 and not sideway and up10m and buy_trend and ( close*1.05 > wma13 and rsi > rsi[1] + 6 or rsi > rsi[1] + 8 and long or is_cross_up and bottomsupport and is_strong_buy or bottomsupport)//and (close > ema48 or close>ema200) // and is_strong_buy and (close > Cto ) and bottomsupport and (close > ema48 or close>ema200)
+longCondition =  up10m_2 and not sideway and up10m and buy_trend and ( close*1.05 > wma13 and rsi > rsi[1] + 6 or rsi > rsi[1] + 8 and long or is_cross_up and bottomsupport and is_strong_buy or bottomsupport) and barstate.isconfirmed//and (close > ema48 or close>ema200) // and is_strong_buy and (close > Cto ) and bottomsupport and (close > ema48 or close>ema200)
 
 plotshape(longCondition ? low*0.997 : na, title="BIG", style=shape.triangleup, location=location.absolute, color=clr_10m_up, size=size.small)
 
 //plotshape(strong_call ? low*0.997 : na, title="N", style=shape.xcross, location=location.absolute, color=clr_10m_up, size=size.small)
 
-shortCondition = not sideway and not up10m and sell_trend and (close*0.94 < wma13 and rsi + 8 < rsi[1] or rsi + 8 < rsi[1] and short or is_br or bigdrop and is_strong_sell) //is_strong_sell and (close < Cto ) and rsi - rsi[1] < -6 and (close < ema48 or close<ema200)
+shortCondition = not sideway and not up10m and sell_trend and (close*0.94 < wma13 and rsi + 8 < rsi[1] or rsi + 8 < rsi[1] and short or is_br or bigdrop and is_strong_sell) and barstate.isconfirmed //is_strong_sell and (close < Cto ) and rsi - rsi[1] < -6 and (close < ema48 or close<ema200)
 
 plotshape(shortCondition ? high*1.003 : na, title="BIG", style=shape.triangledown, location=location.absolute, color=clr_10m_down, size=size.small)
 
@@ -461,8 +461,8 @@ if (shortCondition)
 // exit long when has a short signal and otherwise
 //closelong = shortCondition or ((rsi > 70 ) and high[2] < high[1] and high[1] > high or not up10m and (trendDown > 1 or profit_long or sell_trend or bigdrop and not is_cross_up or is_out_up ))//ta.crossunder(rsi,80) or ta.crossunder(rsi,60))
 //closeshort=  longCondition or up10m and (trendUp > 1 or profit_short or buy_trend or bottomsupport and not is_cross_down) //or ta.crossover(rsi,40) or ta.crossover(rsi,60)
-closelong = shortCondition or sideway and close < Cto and close < wma13 or down10m_2 or not up10m and (trendDown > 1 or profit_long or sell_trend or bigdrop and not is_cross_up or is_out_up )
-closeshort = longCondition or exit_short or up10m and (trendUp > 1 or profit_short or buy_trend or bottomsupport and not is_cross_down)
+closelong = shortCondition or sideway and close < Cto and close < wma13 or down10m_2 or not up10m and (trendDown > 1 or profit_long or sell_trend or bigdrop and not is_cross_up or is_out_up ) and barstate.isconfirmed
+closeshort = longCondition or exit_short or up10m and (trendUp > 1 or profit_short or buy_trend or bottomsupport and not is_cross_down) and barstate.isconfirmed
 
 if(strategy.position_size > 0)
     strategy.close(id="long", when=closelong)
