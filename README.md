@@ -1,5 +1,11 @@
 ## Some pinescripts to study trading futures on Binance
 
+
+## Low Max DrawDown
+
+![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/markdown.png?raw=true "Max DrawDown")
+
+
 ** Coins to trade ex: C98USDTPERP
 ** Timeframe: 1m
 
