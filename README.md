@@ -5,6 +5,10 @@
 
 ![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/markdown.png?raw=true "Max DrawDown")
 
+## SOLUSDTPERP
+backtest SOLUSDTPERP 82%
+![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/SOLUSDTPERP.png?raw=true "SOLUSDTPERP")
+
 
 ** Coins to trade ex: C98USDTPERP
 ** Timeframe: 1m
