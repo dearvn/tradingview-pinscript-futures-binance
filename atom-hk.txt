@@ -1,0 +1,393 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © binancash
+
+
+//@version=5
+strategy("ATOM 1m scalp HK", overlay=true, default_qty_value=200, initial_capital=1)
+
+//Session Rules
+bartimeSess = time('D')
+newbarSess = bartimeSess != bartimeSess[1]
+offset_val = 6
+high_range = ta.valuewhen(newbarSess, high, 0)
+low_range = ta.valuewhen(newbarSess, low, 0)
+
+//Daily Open
+dOpen = request.security(syminfo.tickerid, 'D', open, lookahead=barmerge.lookahead_on)
+
+
+//vwap start
+point_lb = input.int(4)
+point_rb = input.int(4)
+
+
+//plot(close)
+point_ph = ta.pivothigh(point_lb, point_rb)
+point_pl = ta.pivotlow(point_lb, point_rb)
+
+var float running_ph = na
+var float running_pl = na
+
+running_ph := running_ph
+running_pl := running_pl
+
+if point_ph
+    running_ph := point_ph
+
+if point_pl
+    running_pl := point_pl 
+
+plot(running_ph, title = 'R', style = plot.style_circles, linewidth = 1,color=color.red,  offset = -point_rb)
+plot(running_ph, title = 'R', style = plot.style_circles, linewidth = 1,color=color.red, offset = 0)
+
+plot(running_pl, title = 'S',  style = plot.style_circles, linewidth = 1,color=color.blue,offset = -point_rb)
+plot(running_pl, title = 'S',  style = plot.style_circles, linewidth = 1,color=color.blue, offset = 0)
+
+var bool is_strong_buy = false
+var bool is_strong_sell = false
+if running_ph and ta.crossover(close, running_ph)
+    is_strong_buy := true
+    is_strong_sell := false
+if running_pl and ta.crossunder(close, running_ph)
+    is_strong_buy := false
+if running_pl and ta.crossunder(close, running_pl)
+    is_strong_sell := true
+    is_strong_buy := false
+if running_pl and ta.crossover(close, running_pl)
+    is_strong_sell := false
+
+//vwap end
+
+// logic buy sell improve start
+src = close
+di = (6 - 1.0) / 2.0 + 1.0
+c1 = 2 / (di + 1.0)
+c2 = 1 - c1
+c3 = 3.0 * (0.4 * 0.4 + 0.4 * 0.4 * 0.4)
+c4 = -3.0 * (2.0 * 0.4 * 0.4 + 0.4 + 0.4 * 0.4 * 0.4)
+c5 = 3.0 * 0.4 + 1.0 + 0.4 * 0.4 * 0.4 + 3.0 * 0.4 * 0.4
+var float i1 = na
+var float i2 = na
+var float i3 = na
+var float i4 = na
+var float i5 = na
+var float i6 = na
+i1 := c1 * src + c2 * nz(i1[1])
+i2 := c1 * i1 + c2 * nz(i2[1])
+i3 := c1 * i2 + c2 * nz(i3[1])
+i4 := c1 * i3 + c2 * nz(i4[1])
+i5 := c1 * i4 + c2 * nz(i5[1])
+i6 := c1 * i5 + c2 * nz(i6[1])
+
+Cto = -0.4 * 0.4 * 0.4 * i6 + c3 * i5 + c4 * i4 + c5 * i3
+//bfrC = Cto > nz(Cto[1]) ? raise : Cto < nz(Cto[1]) ? fall : na
+//plot(Cto, title='Trend', linewidth=2, style=plot.style_line, color=color.new(color.red, 0), editable=false)
+ema3 = ta.ema(close, 3)
+//plot(ema3, title='EMA', linewidth=2, style=plot.style_line, color=color.new(color.white, 0))
+
+var bool is_cross_up = false
+var bool is_cross_down = false
+if ta.crossover(ema3, Cto)
+    is_cross_up := true
+    is_cross_down := false
+if ta.crossunder(ema3, Cto)
+    is_cross_down := true
+    is_cross_up := false
+
+//condition Long & Short
+long = (close > Cto and close[1] < Cto[1] and close > close[1] or close[1] > Cto[1] and close > close[1] and close [1] < close[2] and close > ema3) ? true : false
+profit_long = close < close[1] and low < ema3 and close[1] > ema3[1] and close[2] > ema3[2]
+//var int trend = 0
+    
+
+short = (close < Cto and close[1] > Cto[1] and close < close[1] or close[1] < Cto[1] and close < close[1] and close [1] > close[2] and close < ema3) ? true : false
+profit_short = close > close[1] and high > ema3 and close[1] < ema3[1] and close[2] < ema3[2]
+
+// logic buy sell improvate end
+
+
+
+//USer configurations 
+va_percent = 0.7
+
+
+show_ccv = true
+
+dtf ='D'
+resolution = 0.5
+
+
+//CCV color
+ccvtxt_color = show_ccv ? color.white : na
+ccvdopen_color = show_ccv ? color.blue : na
+
+
+is_new_bar(t) =>
+    ta.change(time(t)) != 0
+
+round_to_nearest(v, x) =>
+    math.round(v / x) * x
+
+
+tick_size = math.max(syminfo.mintick, resolution)
+
+var a = array.new_float(0)
+
+a_min = 0.0
+a_min := nz(a_min[1], round_to_nearest(low, tick_size))
+a_max = 0.0
+a_max := nz(a_max[1], round_to_nearest(high, tick_size))
+
+d_switch = is_new_bar(dtf)
+
+if d_switch
+    a_min := low
+    a_max := high
+    array.clear(a)
+
+// Scaled min max
+v_min = int(round_to_nearest(low - a_min, tick_size) / tick_size)
+v_max = int(round_to_nearest(high - a_min, tick_size) / tick_size)
+
+// Scaled candle range
+ticks = v_max - v_min
+
+vol = volume / (ticks == 0 ? 1 : ticks)
+
+for i = v_min to math.max(v_max - 1, v_min) by 1
+
+    // Insert new low value
+    if i < 0
+        array.insert(a, i - v_min, vol)
+        continue
+
+    // Adjust index
+    offset = v_min < 0 ? math.abs(v_min) : 0
+    index = int(i + offset)
+
+    // Push new high value
+    if index >= array.size(a)
+        array.push(a, vol)
+        continue
+
+    // Update existing value
+    v = array.get(a, index)
+    array.set(a, index, v + vol)
+
+// Array bounds
+a_min := math.min(a_min, round_to_nearest(low, tick_size))
+a_max := math.max(a_max, round_to_nearest(high, tick_size))
+a_size = array.size(a)
+
+// { POC
+
+poc_index = -1
+poc_prev = -1.0
+sum_vol = 0.0
+
+for i = 0 to a_size - 1 by 1
+
+    poc_current = array.get(a, i)
+    sum_vol += poc_current
+
+    if poc_current > poc_prev
+        poc_prev := poc_current
+        poc_index := i
+        poc_index
+
+// }
+
+// { VA
+
+va_high_index = poc_index
+va_low_index = poc_index
+
+va_vol_cap = sum_vol * va_percent
+sum_va_vol = array.get(a, poc_index)
+
+for i = 1 to a_size - 1 by 1
+
+    above = 0.0
+    if va_high_index + 1 < a_size - 1
+        above += nz(array.get(a, va_high_index + 1), 0.0)
+        above
+    if va_high_index + 2 < a_size - 1
+        above += nz(array.get(a, va_high_index + 2), 0.0)
+        above
+
+    below = 0.0
+    if va_low_index - 1 > 0
+        below += nz(array.get(a, va_low_index - 1), 0.0)
+        below
+    if va_low_index - 2 > 0
+        below += nz(array.get(a, va_low_index - 2), 0.0)
+        below
+
+    if above > below
+        va_high_index := math.min(va_high_index + 2, a_size - 1)
+        sum_va_vol += above
+        sum_va_vol
+    else
+        va_low_index := math.max(va_low_index - 2, 0)
+        sum_va_vol += below
+        sum_va_vol
+
+    if sum_va_vol >= va_vol_cap or va_low_index <= 0 and va_high_index >= a_size - 1
+        break
+
+// }
+
+float p_poc = 0.0
+float p_va_h = 0.0
+float p_va_l = 0.0
+
+float d_poc = 0.0
+float b_poc = 0.0
+
+float d_va_h = 0.0
+float d_va_l = 0.0
+
+d_poc := poc_index * tick_size + a_min
+d_va_h := va_high_index * tick_size + a_min
+d_va_l := va_low_index * tick_size + a_min
+
+
+if is_new_bar(dtf)
+    p_poc := d_poc[1]
+    p_va_h := d_va_h[1]
+    p_va_l := d_va_l[1]
+    b_poc := p_poc[1]
+    b_poc
+else
+    p_poc := p_poc[1]
+    p_va_h := p_va_h[1]
+    p_va_l := p_va_l[1]
+    b_poc := b_poc[1]
+    b_poc
+
+
+
+
+
+ccv_color = show_ccv ? dOpen > p_va_h ? color.blue : dOpen < p_va_l ? color.blue : color.white : na
+
+
+
+
+source = close
+length = input.int(23, minval=1)
+mult = input.float(1.4, minval=0.001, maxval=50)
+basis = ta.sma(source, length)
+dev = mult * ta.stdev(source, length)
+upper = basis + dev
+lower = basis - dev
+buyEntry = ta.crossover(source, lower)
+sellEntry = ta.crossunder(source, upper)
+
+plot(p_poc)
+
+
+
+
+rsiLengthInput = input.int(18, minval=1, title="RSI Length", group="RSI Settings")
+rsiSourceInput = input.source(hlcc4, "Source", group="RSI Settings")
+
+up = ta.rma(math.max(ta.change(rsiSourceInput), 0), rsiLengthInput)
+down = ta.rma(-math.min(ta.change(rsiSourceInput), 0), rsiLengthInput)
+rsi = down == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + up / down))
+
+
+reso = input.timeframe(title='Resolution VWAP', defval='D')
+t = time(reso)
+debut = na(t[1]) or t > t[1]
+addsource = hlc3[barstate.isrealtime ? 1 : 0] * volume
+addvol = volume
+addsource := debut ? addsource : addsource + addsource[1]
+addvol := debut ? addvol : addvol + addvol[1]
+VWAP = addsource / addvol
+sn = 0.0
+sn := debut ? sn : sn[1] + volume * (hlc3 - VWAP[1]) * (hlc3 - VWAP)
+sd = math.sqrt(sn / addvol)
+
+
+stopPer = input(0.4, title='Stop Loss %') / 100 
+takePer = input(0.75, title='Take Profit %') / 100
+
+longStop = strategy.position_avg_price * (1 - stopPer)
+shortStop = strategy.position_avg_price * (1 + stopPer)
+shortTake = strategy.position_avg_price * (1 - takePer)
+longTake = strategy.position_avg_price * (1 + takePer)
+
+plot(VWAP, color=color.yellow)
+
+
+ema48 = ta.wma(close, 48)
+ema11 = ta.wma(close, 11)
+ema200 = ta.wma(close, 200)
+
+close10 = request.security(symbol=syminfo.tickerid, timeframe="10", expression=close, lookahead=barmerge.lookahead_on)
+
+wma10_11 = ta.wma(close, 11)
+wma_10_11 = request.security(symbol=syminfo.tickerid, timeframe="10", expression=wma10_11, lookahead=barmerge.lookahead_on)
+
+wma10_48 = ta.wma(close, 48)
+wma_10_48 = request.security(symbol=syminfo.tickerid, timeframe="10", expression=wma10_48, lookahead=barmerge.lookahead_on)
+
+up10m = false
+if close10 > wma_10_11
+    up10m := true
+
+// change param rsi + 4
+bottomsupport = running_pl and close > running_pl and close > close[1] and rsi > rsi[1] + 4
+
+longCondition = is_strong_buy and (close > Cto ) and bottomsupport and (close > ema48 or close>ema200) //close>p_poc //and buyEntry //and rsi>35 and close>VWAP
+if (longCondition)
+    strategy.entry("long", strategy.long, comment = "ENTER-LONG_BINANCE-FUTURES_ATOMUSDT_ATOM-1m-new_1M_2c57744289bdb919") 
+
+// change param rsi + 4
+shortCondition = is_strong_sell and (close < Cto ) and rsi - rsi[1] < -4 and (close < ema48 or close<ema200)//close<p_poc and sellEntry and rsi<65 and close<VWAP and is_strong_sell
+if (shortCondition)
+    strategy.entry("short", strategy.short, comment = "ENTER-SHORT_BINANCE-FUTURES_ATOMUSDT_ATOM-1m-new_1M_2c57744289bdb919")
+
+
+oc = math.abs(open[1]-close[1])
+hl = math.abs(high[1]-low[1])
+ochl = (oc-hl)/hl
+ll = (low[1]-low[2])/low[2]
+crossUpWMA11 = ta.crossover(ema11, ema48)
+crossDownWMA11 = ta.crossunder(ema11, ema48)
+var bool crossup11_48 = false
+var bool crossdown11_48 = false
+var int cnt_out_up = 0
+if crossUpWMA11
+    crossup11_48 := true
+    crossdown11_48 := false
+    cnt_out_up := 0
+if crossDownWMA11
+    crossup11_48 := false
+    crossdown11_48 := true
+    cnt_out_up := 0
+is_br = open[2] < close[2] and open[1] < close[1] and close < open and close[2] < close[1] and close[1] > close and ochl < 0.1 and (low[3] < low[2] and low[2] < low[1])
+if is_br
+    cnt_out_up := cnt_out_up + 1
+
+is_out_up = false
+if cnt_out_up>2
+    is_out_up := true
+    cnt_out_up := 0
+
+bigdrop = rsi + 4 < rsi[1] and close > ema48
+
+closelong = bigdrop or is_out_up or ta.crossunder(rsi,70) or ta.crossunder(rsi,60)
+closeshort= bottomsupport or ta.crossover(rsi,40) or ta.crossover(rsi,60)
+
+if(strategy.position_size > 0)
+    strategy.close(id="long", when=closelong, comment = "EXIT-LONG_BINANCE-FUTURES_ATOMUSDT_ATOM-1m-new_1M_2c57744289bdb919")
+if(strategy.position_size < 0)
+    strategy.close(id="short", when = closeshort, comment = "EXIT-SHORT_BINANCE-FUTURES_ATOMUSDT_ATOM-1m-new_1M_2c57744289bdb919")
+
+
+if(strategy.position_size > 0)
+    strategy.exit(id='long', limit=longTake,stop = longStop, comment = "EXIT-LONG_BINANCE-FUTURES_ATOMUSDT_ATOM-1m-new_1M_2c57744289bdb919")
+if(strategy.position_size < 0)
+    strategy.exit(id='short', limit=shortTake,stop = shortStop, comment = "EXIT-SHORT_BINANCE-FUTURES_ATOMUSDT_ATOM-1m-new_1M_2c57744289bdb919")
