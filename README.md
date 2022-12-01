@@ -1,6 +1,5 @@
 # Coffee Me
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](clickclone@gmail.com)
 
 ## Some pinescripts to study trading futures on Binance
 
