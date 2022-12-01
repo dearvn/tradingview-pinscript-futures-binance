@@ -5,10 +5,9 @@
 //@version=5
 strategy("SOLUSDTPERP - Strategy Candles Bar", overlay=true)
 
-
 minutes = input.int(45, title = "Max minutes to exit", minval = 0, maxval = 240)
 
-stopPer = input(8, title='Stop Loss %') / 100 
+stopPer = input(10, title='Stop Loss %') / 100 
 takePer = input(10, title='Take Profit %') / 100
 sideway_pct = input.float(0.08, title = 'Sideway %') / 100
 
@@ -450,9 +449,26 @@ if is_long and wma13_wma48_up
 
 ///////////
 
+// close by macd start
+fast_length = 7
+slow_length = 20
+signal_length = 7
+// Calculating
+fast_ma = ta.wma(src, fast_length)
+slow_ma = ta.wma(src, slow_length)
+macd = fast_ma - slow_ma
+signal = ta.wma(macd, signal_length)
+hist = macd - signal
+is_cross_macd_short = ta.crossover(macd, signal) and macd < 0 and signal < 0
+
+plotshape(is_cross_macd_short ? low : na, title="Less", style=shape.diamond, location=location.absolute, color=color.yellow, size=size.tiny)
+
+// close by macd end
+
 
 // exit long when has a short signal and otherwise
 closelong = ((rsi > 70 ) and high[2] < high[1] and high[1] > high or not up10m and (trendDown > 1 or profit_long or bigdrop and not is_cross_up or is_out_up )) and barstate.isconfirmed
+
 
 
 if not keep_long and is_long and high[2]*1.001 >= running_ph and (high[1] < running_ph and close[1] < running_ph or high[2] > high[1] and high[1] > high)
@@ -474,7 +490,7 @@ if closelong
     is_long := false
     cnt_time_long := 0
 
-closeshort = up10m and (trendUp > 1 or profit_short or bottomsupport and not is_cross_down) and barstate.isconfirmed
+closeshort = up10m and (is_cross_macd_short or trendUp > 1 or profit_short or bottomsupport and not is_cross_down) and barstate.isconfirmed
 
 next_long = false
 if is_short and longCondition
@@ -520,3 +536,6 @@ if(strategy.position_size > 0)
     strategy.exit(id='long', limit=longTake,stop = longStop)
 if(strategy.position_size < 0)
     strategy.exit(id='short', limit=shortTake,stop = shortStop)
+
+
+
