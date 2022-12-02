@@ -4,10 +4,6 @@
 ![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/BNBUSDTPERP.png?raw=true "Max DrawDown")
 
 
-## Low Max DrawDown
-
-![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/maxdown.png?raw=true "Max DrawDown")
-
 ## SOLUSDTPERP
 backtest SOLUSDTPERP 82%
 ![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/SOLUSDTPERP.png?raw=true "SOLUSDTPERP")
