@@ -461,7 +461,10 @@ if is_short and wma13_wma48_down or wma13 < wma48 and math.abs(wma13-wma48) < 0.
 if is_long and wma13_wma48_up or wma13 > wma48 and math.abs(wma13-wma48) < 0.005 or wma13 < wma48 and wma13 < wma13[1]
     shortCondition := false
 
-if up10m and down8m
+sideway_short = wma13 < wma48 and math.abs(wma13-wma48) < 0.005
+sideway_long = wma13 > wma48 and math.abs(wma13-wma48) < 0.008
+
+if up10m and down8m or sideway_short or sideway_long
     longCondition := false
     shortCondition := false
 
@@ -481,10 +484,9 @@ is_cross_macd_short = ta.crossover(macd, signal) and macd < 0 and signal < 0
 
 plotshape(is_cross_macd_short ? low : na, title="Less", style=shape.diamond, location=location.absolute, color=color.yellow, size=size.tiny)
 
-
 //label.new(bar_index, low1d*0.999, text="*"+str.format("{0}", math.abs(wma13-wma48)), textcolor=color.yellow, style=label.style_triangleup, size=size.tiny)
-plotshape(wma13 < wma48 and math.abs(wma13-wma48) < 0.005 ?  low1d: na, title="No Long", style=shape.xcross, location=location.absolute, color=color.gray, size=size.tiny)
-plotshape(wma13 > wma48 and math.abs(wma13-wma48) < 0.008 ?  low1d: na, title="No Short", style=shape.xcross, location=location.absolute, color=color.white, size=size.tiny)
+plotshape(sideway_short ?  low1d: na, title="No Long", style=shape.xcross, location=location.absolute, color=color.gray, size=size.tiny)
+plotshape(sideway_long ?  low1d: na, title="No Short", style=shape.xcross, location=location.absolute, color=color.white, size=size.tiny)
 
 
 
@@ -544,11 +546,11 @@ m = minute(time_close, 'UTC-8')
 
 hold_trade = h >= 0 and h < 4 or h == 4 and m <= 30
 
-if (longCondition and not hold_trade)
+if longCondition //and not hold_trade
     strategy.entry("long", strategy.long) 
 
 // change param rsi + 4
-if (shortCondition  and not hold_trade)
+if shortCondition //and not hold_trade
     strategy.entry("short", strategy.short)
 
 //if minutes > 0 and cnt_time_short > minutes and ta.crossover(close, wma13) and barstate.isconfirmed
