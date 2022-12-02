@@ -1,12 +1,12 @@
-# Coffee Me
-
-
 ## Some pinescripts to study trading futures on Binance
+
+## BNBUSDTPERP
+![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/BNBUSDTPERP.png?raw=true "Max DrawDown")
 
 
 ## Low Max DrawDown
 
-![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/markdown.png?raw=true "Max DrawDown")
+![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/BNBUSDTPERP.png?raw=true "Max DrawDown")
 
 ## SOLUSDTPERP
 backtest SOLUSDTPERP 82%
