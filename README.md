@@ -1,3 +1,9 @@
+## No repaint
+** This is a big deal to implement a script without repaint. I use avg(open,..open[n])/n to calcutelate indicator instead of use close.
+
+`no_repaint_futures.txt`
+
+
 ## Some pinescripts to study trading futures on Binance
 
 ## BNBUSDTPERP
