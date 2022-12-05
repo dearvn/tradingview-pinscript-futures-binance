@@ -321,6 +321,9 @@ if ta.crossunder(wma_3m_3, wma_5m_5) or hist[1] > hist //or rsiMA[1] > rsiMA
 end_up_1 = open[4] < open[3] and open[3] < open[2] and open[2] > open[1] and open[1] > open
 
 
+h = hour(time_close, 'UTC-8')
+m = minute(time_close, 'UTC-8')
+
 
 if (longCondition)
     strategy.entry("long", strategy.long) 
@@ -354,9 +357,9 @@ closelong = closeLong1 or closeLong2 or closeLong3 or closeLong4
 if bottomsupport
     closelong := false
 
-closeshort = wma3 < wma11 and open[1] > wma3[1] and open > wma11
+closeshort = wma3 < wma11 and open[1] > wma3[1] and open > wma11 and not (wma_3m_3[1] > wma_3m_3)
 
-if open < wma21 or is_cross_up_rsi
+if open < wma21 or is_cross_up_rsi 
     closeshort := false
 
 if start_bottom
