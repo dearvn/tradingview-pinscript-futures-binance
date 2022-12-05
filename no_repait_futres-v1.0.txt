@@ -328,10 +328,16 @@ m = minute(time_close, 'UTC-8')
 if (longCondition)
     strategy.entry("long", strategy.long) 
 
+closeLong4 =  hist>0 and hist[1] > hist and not (wma_3m_3[1] < wma_3m_3)
+
 
 start_short_2 = wma3 > wma11 and open[2] < wma3 and open[1] < wma11 and open < wma11
-shortCondition = start_short_2 or bigdrop //or end_up_1[1] and not end_up_1 and open < wma3
 
+shortCondition1 = start_short_2 or bigdrop //or end_up_1[1] and not end_up_1 and open < wma3
+
+shortCondition2 = closeLong4 and closeLong4[1] and closeLong4[2]
+
+shortCondition = shortCondition1 or shortCondition2
 
 if (shortCondition)
     strategy.entry("short", strategy.short)
@@ -344,7 +350,6 @@ closeLong2 = end_up_2
 
 closeLong3 = ta.crossunder(open, wma_3m_3) and not (hist[1] < hist)
 
-closeLong4 =  hist>0 and hist[1] > hist and not (wma_3m_3[1] < wma_3m_3)
 
 
 plotshape(closeLong1 ? high : na, title="Logic1", style=shape.xcross, location=location.absolute, color=color.white, size=size.normal)
@@ -357,13 +362,18 @@ closelong = closeLong1 or closeLong2 or closeLong3 or closeLong4
 if bottomsupport
     closelong := false
 
-closeshort = wma3 < wma11 and open[1] > wma3[1] and open > wma11 and not (wma_3m_3[1] > wma_3m_3)
+closeShort2 = wma3 < wma11 and open[1] > wma3[1] and open > wma11 and not (wma_3m_3[1] > wma_3m_3) and not (wma_5m_5[1] > wma_5m_5)  
 
 if open < wma21 or is_cross_up_rsi 
-    closeshort := false
+    closeShort2 := false
 
-if start_bottom
-    closeshort := true
+closeShort1 = start_bottom
+
+closeshort = closeShort1 or closeShort2
+
+plotshape(closeShort1 ? low : na, title="Logic1", style=shape.cross, location=location.absolute, color=color.lime, size=size.normal)
+
+plotshape(closeShort2 ? low : na, title="Logic1", style=shape.cross, location=location.absolute, color=color.yellow, size=size.normal)
 
 //if is_cross_down_rsi
 //    closeshort := false
