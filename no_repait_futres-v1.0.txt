@@ -2,7 +2,7 @@
 // © binancash
 
 //@version=5
-strategy("Futures - New Script", overlay=true)
+strategy("Futures - New Script", overlay=true, pyramiding=1, default_qty_type = strategy.fixed, default_qty_value = 200 )
 
 
 stopPer = input(10, title='Stop Loss %') / 100 
@@ -53,7 +53,7 @@ avg_change = (math.abs(open[10] - open[9]) + math.abs(open[9] - open[8]) + math.
 
 avg = (open[10] + open[9] + open[8] + open[7] + open[6] + open[5] + open[4] + open[3] + open[2] + open[1])/10
 
-
+plot(avg, color=color.rgb(39, 0, 212), linewidth=4)
 //////////////////////////////////
 open3m = request.security(symbol=syminfo.tickerid, timeframe="3", expression=open, lookahead=barmerge.lookahead_on)
 open5m = request.security(symbol=syminfo.tickerid, timeframe="5", expression=open, lookahead=barmerge.lookahead_on)
@@ -92,7 +92,7 @@ bottomsupport = running_pl and avg > running_pl and avg > avg[1] and rsi > rsi[1
 plotshape(bottomsupport ? low : na, title="Logic1", style=shape.diamond, location=location.absolute, color=color.yellow, size=size.normal)
 
 
-bigdrop = rsi + 8 < rsi[1] and avg > ta.sma(avg, 11) and running_ph and avg < running_ph
+bigdrop = rsi + 8 < rsi[1] and avg > ta.sma(avg, 11) and running_ph and avg < running_ph and not (wma_3m_3[1] < wma_3m_3)
 
 is_cross_res = ta.crossover(avg, running_ph) and avg > wma_3m_3 and wma_3m_3 > wma_5m_5
 
@@ -290,7 +290,7 @@ if ta.crossunder(rsi2, rsiMA)
 
 
 
-longCondition1 = wma3 < wma11 and ta.crossover(open,wma21) and (wma_3m_3[1] < wma_3m_3) and not (wma_3m_8[1] > wma_3m_8)
+longCondition1 = wma3 < wma11 and ta.crossover(open,wma21) and (wma_3m_3[1] < wma_3m_3) and not (wma_3m_8[1] > wma_3m_8) 
 
 longCondition2 = wma3 > wma11 and start_up_1 or long[1] and not bottomsupport[2] and bottomsupport[1] and bottomsupport and open[1] < open
 
@@ -299,22 +299,22 @@ longCondition3 = long and not bottomsupport[2] and bottomsupport[1] and bottomsu
 
 longCondition4 = ta.crossover(open, wma_3m_8) and ta.crossover(open, wma_5m_5) and not (wma_3m_3 < wma_5m_5 and wma_5m_5 < wma_3m_8) and not (macd[1] > macd)
 
-start_bottom = hist<0 and hist[1] < hist
+start_bottom = hist<0 and hist[1] < hist //and signal[1] < signal
 
 
-longCondition5 = start_bottom and ta.crossover(wma_3m_3, wma_5m_5)
+longCondition5 = start_bottom and ta.crossover(wma_3m_3, wma_5m_5) and avg[1] < avg
 
 
 plotshape(longCondition1 ? low : na, title="Logic1", style=shape.circle, location=location.absolute, color=color.yellow, size=size.normal)
 plotshape(longCondition2 ? low : na, title="Logic1", style=shape.circle, location=location.absolute, color=color.white, size=size.normal)
 plotshape(longCondition3 ? low : na, title="Logic1", style=shape.circle, location=location.absolute, color=color.blue, size=size.normal)
 plotshape(longCondition4 ? low : na, title="Logic1", style=shape.circle, location=location.absolute, color=color.gray, size=size.normal)
-plotshape(longCondition5 ? low : na, title="Logic1", style=shape.circle, location=location.absolute, color=color.orange, size=size.normal)
+plotshape(longCondition5 ? low : na, title="Logic1", style=shape.circle, location=location.absolute, color=color.red, size=size.normal)
 
 
 longCondition = longCondition1 or longCondition2 or longCondition3 or longCondition4 or longCondition5
 
-if ta.crossunder(wma_3m_3, wma_5m_5) or hist[1] > hist //or rsiMA[1] > rsiMA
+if ta.crossunder(wma_3m_3, wma_5m_5) or hist[1] > hist //or wma_8m_8[1] > wma_8m_8 and wma_3m_8 < wma_8m_8//or rsiMA[1] > rsiMA
     longCondition := false
 
 
@@ -339,6 +339,8 @@ shortCondition2 = closeLong4 and closeLong4[1] and closeLong4[2]
 
 shortCondition = shortCondition1 or shortCondition2
 
+//if wma_8m_8[1] < wma_8m_8
+//    shortCondition := false
 if (shortCondition)
     strategy.entry("short", strategy.short)
 
@@ -364,16 +366,18 @@ if bottomsupport
 
 closeShort2 = wma3 < wma11 and open[1] > wma3[1] and open > wma11 and not (wma_3m_3[1] > wma_3m_3) and not (wma_5m_5[1] > wma_5m_5)  
 
-if open < wma21 or is_cross_up_rsi 
+if open < wma21 or is_cross_up_rsi
     closeShort2 := false
 
-closeShort1 = start_bottom
+closeShort1 = start_bottom and (not (open < wma_3m_3 or open[1] < wma_3m_3[1]) or wma_3m_3[1] < wma_3m_3)
 
-closeshort = closeShort1 or closeShort2
+//closeShort3 =open[2] < wma_3m_3[2] and open > wma_3m_3 and open[1] < open
 
-plotshape(closeShort1 ? low : na, title="Logic1", style=shape.cross, location=location.absolute, color=color.lime, size=size.normal)
+closeshort = closeShort1 or closeShort2 //or closeShort3
 
-plotshape(closeShort2 ? low : na, title="Logic1", style=shape.cross, location=location.absolute, color=color.yellow, size=size.normal)
+plotshape(closeShort1 ? low : na, title="Logic1", style=shape.cross, location=location.absolute, color=color.gray, size=size.normal)
+
+plotshape(closeShort2 ? low : na, title="Logic1", style=shape.cross, location=location.absolute, color=color.white, size=size.normal)
 
 //if is_cross_down_rsi
 //    closeshort := false
