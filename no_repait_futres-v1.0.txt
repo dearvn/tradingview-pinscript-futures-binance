@@ -53,7 +53,29 @@ avg_change = (math.abs(open[10] - open[9]) + math.abs(open[9] - open[8]) + math.
 
 avg = (open[10] + open[9] + open[8] + open[7] + open[6] + open[5] + open[4] + open[3] + open[2] + open[1])/10
 
-plot(avg, color=color.rgb(39, 0, 212), linewidth=4)
+o_h = math.max(open[3], open[2], open[1])
+o_l = math.min(open[3], open[2], open[1])
+o_o = open[1]
+o_c = open
+
+src(_src)  => 
+    Close  = (o_h + o_l + o_o + o_c)/4
+    Open  = (o_o + o_c) / 2
+    High   = math.max(o_h, math.max(Open, Close))
+    Low    = math.min(o_l,  math.min(Open, Close))
+    HL2    = math.avg(High, Low) 
+    HLC3   = math.avg(High, Low, Close) 
+    OHLC4  = math.avg(Open, High, Low, Close)
+    Price  = _src == 'close' ? Close : _src == 'open' ? Open : _src == 'high' ? High : _src == 'low' ? Low : _src == 'hl2' ? HL2 : _src == 'hlc3' ? HLC3 : OHLC4  
+    Source = math.round(Price / syminfo.mintick) * syminfo.mintick  // PineCoders method for aligning Pine prices with chart instrument prices
+
+// === PLOTTING ===
+bar_up   = src('close') < src('open')
+//plotcandle(src('open'), src('high'), src('low'), src('close'), title = "", color = barColor, wickcolor = barColor, bordercolor = barColor)  // plot bars
+//plotbar(open[1], o_h, o_l, open)
+
+
+//plot(avg, color=color.rgb(39, 0, 212), linewidth=4)
 //////////////////////////////////
 open3m = request.security(symbol=syminfo.tickerid, timeframe="3", expression=open, lookahead=barmerge.lookahead_on)
 open5m = request.security(symbol=syminfo.tickerid, timeframe="5", expression=open, lookahead=barmerge.lookahead_on)
@@ -133,8 +155,8 @@ if close8 < wma_8_48
 
 
 
-plotshape(down8m ?  low1d*0.998: na, title="No Short", style=shape.circle, location=location.absolute, color=color.yellow, size=size.tiny)
-plotshape(up10m ?  low1d*0.995: na, title="No Short", style=shape.circle, location=location.absolute, color=color.blue, size=size.tiny)
+//plotshape(down8m ?  low1d*0.998: na, title="No Short", style=shape.circle, location=location.absolute, color=color.yellow, size=size.tiny)
+//plotshape(up10m ?  low1d*0.995: na, title="No Short", style=shape.circle, location=location.absolute, color=color.blue, size=size.tiny)
 
 
 /////////////////////////*****
@@ -299,6 +321,7 @@ longCondition3 = long and not bottomsupport[2] and bottomsupport[1] and bottomsu
 
 longCondition4 = ta.crossover(open, wma_3m_8) and ta.crossover(open, wma_5m_5) and not (wma_3m_3 < wma_5m_5 and wma_5m_5 < wma_3m_8) and not (macd[1] > macd)
 
+
 start_bottom = hist<0 and hist[1] < hist //and signal[1] < signal
 
 
@@ -314,18 +337,27 @@ plotshape(longCondition5 ? low : na, title="Logic1", style=shape.circle, locatio
 
 longCondition = longCondition1 or longCondition2 or longCondition3 or longCondition4 or longCondition5
 
-if ta.crossunder(wma_3m_3, wma_5m_5) or hist[1] > hist //or wma_8m_8[1] > wma_8m_8 and wma_3m_8 < wma_8m_8//or rsiMA[1] > rsiMA
+continue_down = math.abs(wma_3m_8 - wma_8m_8) >  math.abs(wma_3m_8[1] - wma_8m_8[1]) and math.abs(wma_3m_8[2] - wma_8m_8[2]) >  math.abs(wma_3m_8[3] - wma_8m_8[3])
+
+continue_up = math.abs(wma_3m_8 - wma_8m_8) <  math.abs(wma_3m_8[1] - wma_8m_8[1]) and math.abs(wma_3m_8[1] - wma_8m_8[1]) <  math.abs(wma_3m_8[2] - wma_8m_8[2])
+
+
+plotshape(not bar_up ?  low1d*0.998: na, title="No Short", style=shape.circle, location=location.absolute, color=color.yellow, size=size.tiny)
+plotshape(bar_up ?  low1d*0.998: na, title="No Short", style=shape.circle, location=location.absolute, color=color.blue, size=size.tiny)
+
+
+if ta.crossunder(wma_3m_3, wma_5m_5) or hist[1] > hist or not bar_up//or continue_down//nd wma_3m_8 < wma_8m_8//or rsiMA[1] > rsiMA
     longCondition := false
 
 
 end_up_1 = open[4] < open[3] and open[3] < open[2] and open[2] > open[1] and open[1] > open
 
 
-h = hour(time_close, 'UTC-8')
-m = minute(time_close, 'UTC-8')
+h = hour(time_close, 'UTC+7')
+m = minute(time_close, 'UTC+7')
+lock_time = h >= 2 and h < 7
 
-
-if (longCondition)
+if (longCondition) and not lock_time
     strategy.entry("long", strategy.long) 
 
 closeLong4 =  hist>0 and hist[1] > hist and not (wma_3m_3[1] < wma_3m_3)
@@ -339,9 +371,9 @@ shortCondition2 = closeLong4 and closeLong4[1] and closeLong4[2]
 
 shortCondition = shortCondition1 or shortCondition2
 
-//if wma_8m_8[1] < wma_8m_8
-//    shortCondition := false
-if (shortCondition)
+if bar_up
+    shortCondition := false
+if (shortCondition) and not lock_time
     strategy.entry("short", strategy.short)
 
 
@@ -352,7 +384,7 @@ closeLong2 = end_up_2
 
 closeLong3 = ta.crossunder(open, wma_3m_3) and not (hist[1] < hist)
 
-
+closeLong5 = wma_8m_8[1] > wma_8m_8 and open[2] >= open[1] and open[1] >= open
 
 plotshape(closeLong1 ? high : na, title="Logic1", style=shape.xcross, location=location.absolute, color=color.white, size=size.normal)
 plotshape(closeLong2 ? high : na, title="Logic1", style=shape.xcross, location=location.absolute, color=color.orange, size=size.normal)
@@ -360,7 +392,8 @@ plotshape(closeLong3 ? high : na, title="Logic1", style=shape.xcross, location=l
 plotshape(closeLong4 ? high : na, title="Logic1", style=shape.xcross, location=location.absolute, color=color.blue, size=size.normal)
 
 
-closelong = closeLong1 or closeLong2 or closeLong3 or closeLong4
+closelong = closeLong1 or closeLong2 or closeLong3 or closeLong4 //or closeLong5
+
 if bottomsupport
     closelong := false
 
