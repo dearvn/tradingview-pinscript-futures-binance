@@ -1,0 +1,39 @@
+//@version=5
+indicator("No Repaint - ICHIMOKU", shorttitle="OPEN - ICH", overlay=true)
+
+
+TKlength=input.int(9, "Tenkansen Length", minval=1)
+KJlength=input.int(26, "Kijunsen Length", minval=1)
+CSHSlength=input.int(26, "Chikouspan Length/Horizontal Shift", minval=1)
+SBlength=input.int(52, "SenkouspanB Length", minval=1)
+SAlength=input.int(26,"SenkouspanA Length", minval=1)
+
+src = (open[9] + open[8] + open[7] + open[6] + open[5] + open[4] + open[3] + open[2] + open[1] + open)/10
+
+TK=math.avg(ta.lowest(src, TKlength), ta.highest(src, TKlength))
+KJ=math.avg(ta.lowest(src, KJlength), ta.highest(src, KJlength))
+CS=src
+SB=math.avg(ta.lowest(src, SBlength), ta.highest(src, SBlength))
+SA=math.avg(TK,KJ)
+
+plot(TK, linewidth=2, color=color.blue, title="TenkanSen")
+plot(KJ, linewidth=2, color=color.red, title="KijunSen")
+
+plot(CS, offset=-CSHSlength, linewidth=2, color=#DDA0DD, title="ChikouSpan")
+
+SenkouA=plot(SA, offset=CSHSlength,  linewidth=1, color=color.green, title="SenkouSpanA")
+SenkouB=plot(SB, offset=CSHSlength, linewidth=1, color=color.purple, title="SenkouSpanB")
+
+fill(SenkouA, SenkouB, color = SA > SB ? color.green : color.red)
+
+al=ta.crossover(KJ,SB[26])
+plotshape(al, style=shape.triangleup,location=location.belowbar, color=color.green,size=size.small)
+sat=ta.crossover(SB[26],KJ)
+plotshape(sat, style=shape.triangledown,location=location.abovebar, color=color.red,size=size.small)
+
+buy = TK > KJ
+alertcondition(buy, title="ICHIKOMU Buy Signal", message='Buy Buy BUY Signal Alert')
+
+sell = TK > KJ
+alertcondition(sell, title="ICHIKOMU Sell Signal", message='Sell Sell Sell Signal Alert')
+
