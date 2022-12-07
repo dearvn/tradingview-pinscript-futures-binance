@@ -22,9 +22,9 @@ plot(KJ, linewidth=2, color=color.red, title="KijunSen")
 plot(CS, offset=-CSHSlength, linewidth=2, color=#DDA0DD, title="ChikouSpan")
 
 SenkouA=plot(SA, offset=CSHSlength,  linewidth=1, color=color.green, title="SenkouSpanA")
-SenkouB=plot(SB, offset=CSHSlength, linewidth=1, color=color.purple, title="SenkouSpanB")
+SenkouB=plot(SB, offset=CSHSlength, linewidth=1, color=color.blue, title="SenkouSpanB")
 
-fill(SenkouA, SenkouB, color = SA > SB ? color.green : color.red)
+fill(SenkouA, SenkouB, color = SA > SB ? color.new(#660990,70) : color.new(#A20990,70))
 
 al=ta.crossover(KJ,SB[26])
 plotshape(al, style=shape.triangleup,location=location.belowbar, color=color.green,size=size.small)
