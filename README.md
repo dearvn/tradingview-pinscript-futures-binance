@@ -2,6 +2,8 @@
 
 ## Trading on Binance
 
+Timeline trading: 6:00AM to 1:00PM
+
 * Using script `ETHUSDTPERP.txt` to auto bot from tradingview to Binance
 
 * AUTO ALERT ETHUSDTPERP
