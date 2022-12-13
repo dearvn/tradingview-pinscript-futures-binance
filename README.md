@@ -1,6 +1,6 @@
 **If you win, please support me on Paypal: clickclone@gmail.com**
 
-## Trading on Binanance
+## Trading on Binance
 
 * Using script `ETHUSDTPERP.txt` to auto bot from tradingview to Binance
 
