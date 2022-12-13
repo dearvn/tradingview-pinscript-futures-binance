@@ -5,7 +5,6 @@
 //@version=5
 strategy("V1.0 ETHUSDTPERP - Futures 1M", overlay=true, pyramiding=1, default_qty_type = strategy.fixed, default_qty_value = 10 )
 
-
 stopPerCall = input(0.09, title='Stop Loss Call %') / 100 
 takePerCall = input(0.05, title='Take Profit Call %') / 100
 
@@ -739,7 +738,7 @@ var float call_price = 0.0
 var float put_price = 0.0
 
 if (longCondition) and not lock_time
-    strategy.entry("call", strategy.long)
+    strategy.entry("long", strategy.long)
     is_longCondition11 := false
 
     call_price :=  close
@@ -830,7 +829,7 @@ if bar_up or macd_12_26[1] < macd_12_26 or rsiMA[1] < rsiMA
 
 //shortCondition := shortCondition or shortCondition8
 if (shortCondition)  and not lock_time
-    strategy.entry("put", strategy.short)
+    strategy.entry("short", strategy.short)
 
     call_price := 0.0
     put_price := close
@@ -971,4 +970,6 @@ if(strategy.position_size < 0)
 
 plotshape(longCondition and not lock_time ?  low1d*0.997: na, title="Buy", style=shape.triangleup, location=location.absolute, color=color.green, size=size.tiny, text="BUY", textcolor=color.green)
 plotshape(shortCondition and not lock_time ?  low1d*0.997: na, title="Sell", style=shape.triangledown, location=location.absolute, color=color.red, size=size.tiny, text="SELL", textcolor=color.green)
+
+
 
