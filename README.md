@@ -1,13 +1,19 @@
-## No repaint
-** This is a big deal to implement a script without repaint. I use avg(open,..open[n])/n to calcutelate indicator instead of use close.
+**If you win, please support me on Paypal: clickclone@gmail.com**
 
-`no_repait_futres-v1.0.txt`
+## Trading on Binanance
+
+* Using script `ETHUSDTPERP.txt` to auto bot from tradingview to Binance
+
+* AUTO ALERT ETHUSDTPERP
+`ETHUSDTPERP.txt`
+
+![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/ETHUSDTPERP.png?raw=true "Max DrawDown")
 
 
 ## Some pinescripts to study trading futures on Binance
 
 ## BNBUSDTPERP
-![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/BNBUSDTPERP.png?raw=true "Max DrawDown")
+![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/ETHUSDTPERP.png?raw=true "Max DrawDown")
 
 
 ## SOLUSDTPERP
