@@ -11,6 +11,11 @@ Timeline trading: 6:00AM to 1:00PM
 
 ![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/ETHUSDTPERP.png?raw=true "Max DrawDown")
 
+## History
+* 12/14/2022
+
+![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/12142022.png?raw=true "12142022")
+
 
 ## Some pinescripts to study trading futures on Binance
 
