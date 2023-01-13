@@ -1,5 +1,8 @@
 **If you win, please support me on Paypal: clickclone@gmail.com**
 
+ETHUSDT: 0x269a945fb11642235c1c6ae3fe755ce9d7a50e32
+ETHBUSD: 0x269a945fb11642235c1c6ae3fe755ce9d7a50e32
+
 ## Trading on Binance
 
 Timeline trading: 6:00AM to 1:00PM
