@@ -4,10 +4,16 @@
 
 Timeline trading: 6:00AM to 1:00PM
 
-* Using script `ETHUSDTPERP.txt` to auto bot from tradingview to Binance
+* 2023 Using script `ETHUSDTPERP.txt` to auto bot from tradingview to Binance
 
 * AUTO ALERT ETHUSDTPERP
 `ETHUSDTPERP.txt`
+
+## Profit
+
+![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/eth1.png?raw=true "01122023")
+
+![Alt text](https://github.com/dearvn/tradingview-pinscript-futures-binance/raw/main/eth2.png?raw=true "01122023")
 
 
 ## History
